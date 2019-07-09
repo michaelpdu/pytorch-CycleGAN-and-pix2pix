@@ -5,6 +5,12 @@ import cv2
 import numpy as np
 from .face_helper import get_face_rect
 
+def crop_square(image_path, square_path):
+    image = Image.open(image_path)
+    ow, oh = image.size
+    cut = abs(ow - oh) / 2
+    cropped_image = image.crop((cut, 0, oh + cut, oh))
+    cropped_image.save(square_path)
 
 def generate_fake_merged_image(image_path, fake_merged_path):
     image = Image.open(image_path)
