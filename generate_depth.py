@@ -80,9 +80,7 @@ class DepthGenerator:
     def save_16bit_grayscale(self, rgb_image, output):
         pass
 
-    def generate(self, input, output):
-        if not os.path.exists(output):
-            os.makedirs(output)
+    def generate(self, input):
         if os.path.isfile(input):
             self.gen_image_depth(input)
         elif os.path.isdir(input):
@@ -92,9 +90,7 @@ class DepthGenerator:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Command Usages of DepthImageGenerator')
-    parser.add_argument("input", type=str, help="input image file/dir")
-    parser.add_argument("-o", "--output", type=str, default='generated', help="output image dir")
+    parser.add_argument("input", type=str, help="input image file")
     args = parser.parse_args()
-
     gen = DepthGenerator()
-    gen.generate(args.input, args.output)
+    gen.generate(args.input)
