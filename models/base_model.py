@@ -42,6 +42,7 @@ class BaseModel(ABC):
         self.optimizers = []
         self.image_paths = []
         self.metric = 0  # used for learning rate policy 'plateau'
+        self.has_realb = True
 
     @staticmethod
     def modify_commandline_options(parser, is_train):
@@ -128,6 +129,8 @@ class BaseModel(ABC):
         """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
         visual_ret = OrderedDict()
         for name in self.visual_names:
+            if self.has_realb is False and name == 'real_B':
+                continue
             if isinstance(name, str):
                 visual_ret[name] = getattr(self, name)
         return visual_ret
