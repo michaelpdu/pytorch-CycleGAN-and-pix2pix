@@ -79,7 +79,10 @@ class ImageHelper:
                 depth_image_name = filename_wo_surfix + '_depth.raw.bmp'
 
                 image_path = os.path.join(root_dir, filename)
-                (top, right, bottom, left) = get_face_rect(image_path)
+                box = get_face_rect(image_path)
+                if box == None:
+                    continue
+                (top, right, bottom, left) = box
 
                 image_rgb = Image.open(image_path)
                 wa, ha = image_rgb.size
