@@ -3,7 +3,10 @@ import argparse
 from PIL import Image
 import cv2
 import numpy as np
-from .face_helper import get_face_rect
+
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from face_helper import get_face_rect
 
 def crop_square(image_path, square_path):
     image = Image.open(image_path)
@@ -191,14 +194,6 @@ if __name__ == '__main__':
                     helper.batch_grayscale_conversion(args.input, args.output)
                 else:
                     print('ERROR: Unimplemented Command!')
-            else:
-                parser.print_help()
-        elif args.gs8to16:
-            if os.path.isfile(args.input):
-                pass
-            elif os.path.isdir(args.input):
-                # helper.batch_grayscale_conversion(args.input, args.output)
-                pass
             else:
                 parser.print_help()
         else:

@@ -4,7 +4,7 @@ import argparse
 from data import create_dataset
 from models import create_model
 from PIL import Image
-from tools.face_helper import save_face_image
+from tools.face_helper import save_face_image, GAP
 from tools.image_helper import generate_fake_merged_image, crop_square
 
 class DepthGenerator:
@@ -65,6 +65,8 @@ class DepthGenerator:
         face_depth_path = os.path.join(self.tmp_results_dir, 'face_pix2pix', 'test_latest', 'images',
                                          name_wo_ext + '_face_fake_merged_fake_B.png')
 
+        # prepare a new black image 640x480
+        image = Image.new('RGB', (640, 480))
         # resize generated figure image to 480x480
         figure_image = Image.open(figure_depth_path)
         figure_image = figure_image.resize((480, 480))
@@ -72,7 +74,9 @@ class DepthGenerator:
         face_image = Image.open(face_depth_path)
         face_image = face_image.resize((right-left, bottom-top))
         figure_image.paste(face_image, (left, top, right, bottom))
-        figure_image.save(os.path.join(self.tmp_results_dir, name_wo_ext+'_depth.png'))
+        # paste figure image to black one
+        image.paste(figure_image, (80, 0, 480+80, 480))
+        image.save(os.path.join(self.tmp_results_dir, name_wo_ext + '_depth.png'))
 
     def save_8bit_grayscale(self, rgb_image, output):
         pass
