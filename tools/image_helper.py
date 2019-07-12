@@ -24,6 +24,19 @@ def generate_fake_merged_image(image_path, fake_merged_path):
     new_image.paste(cropped_image, (0, 0))
     new_image.save(fake_merged_path)
 
+def png_to_jpg(png_image_path, jpg_image_dir):
+    _, name = os.path.split(png_image_path)
+    name_wo_ext, ext = os.path.splitext(name)
+    if ext == '.png':
+        png = Image.open(png_image_path)
+        png.convert("RGBA")
+        background = Image.new("RGB", png.size, (255, 255, 255))
+        background.paste(png, mask=png.split()[3]) # 3 is the alpha channel
+        # background.save('foo.jpg', 'JPEG', quality=80)
+        background.save(os.path.join(jpg_image_dir, name_wo_ext+'.jpg'), 'JPEG')
+    else:
+        print('Not PNG file:', png_image_path)
+
 class ImageHelper:
     def __init__(self):
         self.avg_ratio = 3.6
@@ -163,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument("-mf", "--merge_face", action='store_true', help="merge face in two images")
     parser.add_argument("-r", "--retrieve", action='store_true', help="retrieve grayscale image")
     parser.add_argument("-c", "--convert", type=str, \
-                        help="convert image type, gs16to8|gs8to16|rgb888to8bit|rgb888to16bit")
+                        help="convert image type, gs16to8|gs8to16|rgb888to8bit|rgb888to16bit|png2jpg")
     args = parser.parse_args()
 
     if args.input:
@@ -195,6 +208,11 @@ if __name__ == '__main__':
             elif os.path.isdir(args.input):
                 if args.convert == 'gs16to8':
                     helper.batch_grayscale_conversion(args.input, args.output)
+                elif args.convert == 'png2jpg':
+                    for root, dirs, files in os.walk(args.input):
+                        for name in files:
+                            input_file = os.path.join(root, name)
+                            png_to_jpg(input_file, args.output)
                 else:
                     print('ERROR: Unimplemented Command!')
             else:
