@@ -1,0 +1,1 @@
+python test.py --dataroot ./datasets/faces2 --name figure_pix2pix --model pix2pix --netG unet_256 --direction AtoB --dataset_mode aligned --norm batch --output_nc=3 --gpu_ids="0" --load_size=512 --crop_size=512 --num_test=800
