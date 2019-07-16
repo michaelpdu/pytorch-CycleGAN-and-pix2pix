@@ -6,7 +6,7 @@ import numpy as np
 
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from face_helper import get_face_rect
+from face_helper import get_face_rect, GAP
 
 def crop_square(image_path, square_path):
     image = Image.open(image_path)
@@ -42,7 +42,7 @@ class ImageHelper:
         self.avg_ratio = 3.6
         self.total_ratio = 0
         self.count = 0
-        self.extra = 20
+        self.extra = GAP
 
     def generate_fake_merged_images(self, root_dir, output_dir):
         for filename in os.listdir(root_dir):
@@ -72,8 +72,8 @@ class ImageHelper:
             if name_wo_ext.endswith('_color'):
                 print(filename)
                 filename_wo_surfix = name_wo_ext[0:-6]
-                depth_image_name = filename_wo_surfix + '_depth_8bit' + '.png'
-                # depth_image_name = filename_wo_surfix + '_depth.raw.bmp'
+                # depth_image_name = filename_wo_surfix + '_depth_8bit' + '.png'
+                depth_image_name = filename_wo_surfix + '_depth.raw.bmp'
 
                 image_path = os.path.join(root_dir, filename)
                 rect = get_face_rect(image_path)
