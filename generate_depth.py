@@ -5,7 +5,7 @@ from data import create_dataset
 from models import create_model
 from PIL import Image
 from tools.face_helper import save_face_image, GAP
-from tools.image_helper import generate_fake_merged_image, crop_square
+from tools.image_helper import generate_fake_merged_image, crop_square, ImageHelper
 
 class DepthGenerator:
     def __init__(self):
@@ -19,6 +19,9 @@ class DepthGenerator:
         if not os.path.exists(self.tmp_test_sample_dir):
             os.makedirs(self.tmp_test_sample_dir)
         self.tmp_results_dir = os.path.join(self.tmp_dir, 'results')
+        self.gen_face = False
+
+        self.image_helper = ImageHelper()
 
     def __del__(self):
         # if os.path.exists(self.tmp_dir):
@@ -41,48 +44,52 @@ class DepthGenerator:
         self.run_test_script(self.tmp_sample_dir, 'figure_pix2pix', self.tmp_results_dir)
         os.remove(merged_figure_file)
 
-        # get face information
-        # 1. crop square image from 640X480, so cropped image is 480X480
-        square_file = os.path.join(self.tmp_sample_dir, name_wo_ext + '_square' + ext)
-        crop_square(input_file, square_file)
-        # 2. get face image from 480X480 image，and return face position
-        face_file = os.path.join(self.tmp_sample_dir, name_wo_ext+'_face'+ext)
-        (left, top, right, bottom) = save_face_image(square_file, face_file)
-        # 3. generate fake merged face images
-        merged_face_file = os.path.join(self.tmp_test_sample_dir, name_wo_ext + '_face_fake_merged' + ext)
-        generate_fake_merged_image(face_file, merged_face_file)
-        # 4. remove square file and face file
-        os.remove(square_file)
-        os.remove(face_file)
-
-        # generate depth image of face
-        self.run_test_script(self.tmp_sample_dir, 'face_pix2pix', self.tmp_results_dir)
-        os.remove(merged_face_file)
-
-        # merge face into figure image
         figure_depth_path = os.path.join(self.tmp_results_dir, 'figure_pix2pix', 'test_latest', 'images',
-                                         name_wo_ext + '_fake_merged_fake_B.png')
-        face_depth_path = os.path.join(self.tmp_results_dir, 'face_pix2pix', 'test_latest', 'images',
-                                         name_wo_ext + '_face_fake_merged_fake_B.png')
+                                            name_wo_ext + '_fake_merged_fake_B.png')
+
+        if self.gen_face:
+            # get face information
+            # 1. crop square image from 640X480, so cropped image is 480X480
+            square_file = os.path.join(self.tmp_sample_dir, name_wo_ext + '_square' + ext)
+            crop_square(input_file, square_file)
+            # 2. get face image from 480X480 image，and return face position
+            face_file = os.path.join(self.tmp_sample_dir, name_wo_ext+'_face'+ext)
+            (left, top, right, bottom) = save_face_image(square_file, face_file)
+            # 3. generate fake merged face images
+            merged_face_file = os.path.join(self.tmp_test_sample_dir, name_wo_ext + '_face_fake_merged' + ext)
+            generate_fake_merged_image(face_file, merged_face_file)
+            # 4. remove square file and face file
+            os.remove(square_file)
+            os.remove(face_file)
+
+            # generate depth image of face
+            self.run_test_script(self.tmp_sample_dir, 'face_pix2pix', self.tmp_results_dir)
+            os.remove(merged_face_file)
+
+            # merge face into figure image
+            face_depth_path = os.path.join(self.tmp_results_dir, 'face_pix2pix', 'test_latest', 'images',
+                                            name_wo_ext + '_face_fake_merged_fake_B.png')
 
         # prepare a new black image 640x480
         image = Image.new('RGB', (640, 480))
         # resize generated figure image to 480x480
         figure_image = Image.open(figure_depth_path)
         figure_image = figure_image.resize((480, 480))
-        # resize generated face image to original size
-        face_image = Image.open(face_depth_path)
-        face_image = face_image.resize((right-left, bottom-top))
-        figure_image.paste(face_image, (left, top, right, bottom))
+        if self.gen_face:
+            # resize generated face image to original size
+            face_image = Image.open(face_depth_path)
+            face_image = face_image.resize((right-left, bottom-top))
+            figure_image.paste(face_image, (left, top, right, bottom))
         # paste figure image to black one
         image.paste(figure_image, (80, 0, 480+80, 480))
-        image.save(os.path.join(self.tmp_results_dir, name_wo_ext + '_depth.png'))
-
-    def save_8bit_grayscale(self, rgb_image, output):
-        pass
-
-    def save_16bit_grayscale(self, rgb_image, output):
-        pass
+        rgb_depth_path = os.path.join(self.tmp_results_dir, name_wo_ext + '_depth.png')
+        image.save(rgb_depth_path)
+        # convert RGB888 to 8-bit grayscale
+        depth_8bit_path = os.path.join(self.tmp_results_dir, name_wo_ext + '_depth_8bit.png')
+        self.image_helper.rgb888_to_8bit_grayscale(rgb_depth_path, depth_8bit_path)
+        # convert 8-bit grayscale to 16-bit grayscale
+        depth_16bit_path = os.path.join(self.tmp_results_dir, name_wo_ext + '_depth_16bit.png')
+        self.image_helper.grayscale_8to16(depth_8bit_path, depth_16bit_path)
 
     def generate(self, input):
         if os.path.isfile(input):
