@@ -53,6 +53,19 @@ class ImageHelper:
             output_file = os.path.join(output_dir, name_wo_ext + '_fake_merged' + ext)
             generate_fake_merged_image(input_file, output_file)
 
+    def generate_fake_merged(self, input, output):
+        if os.path.isdir(input):
+            self.generate_fake_merged_images(input, output)
+        elif os.path.isfile(input):
+            _, name = os.path.split(input)
+            name_wo_ext, ext = os.path.splitext(name)
+            if ext != '.jpg' and ext != '.png':
+                print('Unknown extension:', input)
+                return
+            generate_fake_merged_image(input, os.path.join(output, name_wo_ext + '_fake_merged' + ext))
+        else:
+            pass
+
     def generate_merged_face_images(self, root_dir, output_dir):
         for filename in os.listdir(root_dir):
             name_wo_ext, ext = os.path.splitext(filename)
@@ -192,7 +205,7 @@ if __name__ == '__main__':
         elif args.generate:
             if not os.path.exists(args.output):
                 os.mkdir(args.output)
-            helper.generate_fake_merged_images(args.input, args.output)
+            helper.generate_fake_merged(args.input, args.output)
         elif args.retrieve:
             helper.retrieve_grayscale_image(args.input, args.output)
         elif args.convert:
