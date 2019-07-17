@@ -1,6 +1,7 @@
 import os
 import shutil
 import argparse
+import platform
 from data import create_dataset
 from models import create_model
 from PIL import Image
@@ -20,14 +21,21 @@ class DepthGenerator:
             os.makedirs(self.tmp_test_sample_dir)
         self.tmp_results_dir = os.path.join(self.tmp_dir, 'results')
 
+        platform_system = platform.system() 
+        if platform_system == 'Linux':
+            self.python_path = "/home/dupei/anaconda3/envs/pix2pix/bin/python"
+        elif platform_system == 'Darwin':
+            self.python_path = "/Users/dupei/anaconda3/envs/pytorch/bin/python"
+        else:
+            print('ERROR: Unsupported platform!')
+
     def __del__(self):
         # if os.path.exists(self.tmp_dir):
         #     shutil.rmtree(self.tmp_dir)
         pass
 
     def run_test_script(self, sample_dir, model_name, result_dir):
-        python_path = "/Users/dupei/anaconda3/envs/pytorch/bin/python"
-        cmd = '{} test.py --dataroot={} --name={} --model=pix2pix --netG=unet_256 --direction=AtoB --dataset_mode=aligned --norm=batch --output_nc=3 --gpu_ids="-1" --results_dir={} --load_size=512 --crop_size=512'.format(python_path, sample_dir, model_name, result_dir)
+        cmd = '{} test.py --dataroot={} --name={} --model=pix2pix --netG=unet_256 --direction=AtoB --dataset_mode=aligned --norm=batch --output_nc=3 --gpu_ids="-1" --results_dir={} --load_size=512 --crop_size=512'.format(self.python_path, sample_dir, model_name, result_dir)
         os.system(cmd)
 
     def gen_image_depth(self, input_file):
