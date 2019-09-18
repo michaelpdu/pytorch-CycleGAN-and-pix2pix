@@ -2,7 +2,7 @@ import argparse
 import face_recognition
 from PIL import Image
 
-GAP = 20
+GAP = 40
 
 def get_face_rect(image_path):
     image_array = face_recognition.load_image_file(image_path)
