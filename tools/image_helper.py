@@ -216,6 +216,8 @@ if __name__ == '__main__':
                     helper.grayscale_8to16(args.input, args.output)
                 elif args.convert == 'rgb888to8bit':
                     helper.rgb888_to_8bit_grayscale(args.input, args.output)
+                elif args.convert == 'rgb888to16bit':
+                    helper.rgb888_to_16bit_grayscale(args.input, args.output)
                 else:
                     print('ERROR: Unimplemented Command!')
             elif os.path.isdir(args.input):
