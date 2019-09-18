@@ -14,8 +14,8 @@ class SplitHelper:
         if not os.path.exists(self.input_dir):
             raise('ERROR: input dir does not exists!')
 
-        shutil.rmtree(self.output_dir)
-        if not os.path.exists(self.output_dir):
+        if os.path.exists(self.output_dir):
+            shutil.rmtree(self.output_dir)
             os.makedirs(self.output_dir)
         if not os.path.exists(self.train_dir):
             os.makedirs(self.train_dir)
@@ -29,8 +29,10 @@ class SplitHelper:
         count = len(filename_list)
         random.shuffle(filename_list)
 
-        train_list = filename_list[0:count*percent]
-        val_list = filename_list[count*percent:-1]
+        p = int(count*percent)
+        print('percent:', p)
+        train_list = filename_list[0:p]
+        val_list = filename_list[p:-1]
         
         for filename in train_list:
             shutil.copy2(os.path.join(self.input_dir, filename), self.train_dir)
